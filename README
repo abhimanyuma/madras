@@ -1,0 +1,35 @@
+# Madras - URL Shortner
+
+Madras is a simple URL shortner written in golang.The URL shortner
+is written with the primary aim of exposing me to the language,
+the secondary of being fast. 
+
+It will use golang with net/http and lib/pq.
+
+The shortcode -> url mappings are maintained in memory as simple 
+golang variables until it crosses the 1M treshold, at which point we
+will look into which are the most important ones. 
+
+The steps are as follows for first version. 
+
+1. Get shortcode
+2. Render 301 redirect.
+3. Use channels to write analytics data.
+
+The creation API is again simple however involves a DB call. 
+1. Get the URL
+2. Search for the URL in database
+3. If found return present shortcode, else create new one. 
+4. Show shortcode to user. 
+
+Shortcodes will use a base 50 system with 20 letters in small and
+caps and 10 digits. All vowels and the letter s is removed. 
+
+Each shortcode will currently be of 6 characters which gives us 15
+billion options. We are looking at interesting things for the 
+shorter options like giving people entire prefixes and subdomains 
+which can then be personalized. 
+
+
+P.S: The name is a placeholder, and I choose placeholders from a list
+of coffees.
