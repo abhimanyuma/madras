@@ -2,11 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/abhimanyuma/madras/narad"
+	"log"
 	"net/http"
 	"strings"
 )
 
 var data_store map[string]string
+var db_store narad.NaradDB
+var db_error error
 
 func registrationHandler(w http.ResponseWriter, r *http.Request) {
 	paths := strings.Split(string(r.URL.Path[1:]), "/")
@@ -32,6 +36,13 @@ func retrivalHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	data_store = make(map[string]string)
+	db_store, db_error = narad.Connect()
+
+	if db_error != nil {
+		log.Fatal(db_error)
+		return
+	}
+
 	http.HandleFunc("/register/", registrationHandler)
 	http.HandleFunc("/", retrivalHandler)
 	http.ListenAndServe(":8080", nil)
