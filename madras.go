@@ -8,26 +8,27 @@ import (
 	"strings"
 )
 
-var data_store map[string]string
-var db_store narad.NaradDB
+var data_store *narad.NaradDB
 var db_error error
 
 func registrationHandler(w http.ResponseWriter, r *http.Request) {
 	paths := strings.Split(string(r.URL.Path[1:]), "/")
-	key := paths[1]
-	value := paths[2]
-	val, ok := data_store[key]
-	if ok {
-		fmt.Fprintf(w, "Key - %s already present and set to %s", key, val)
+	url := paths[1]
+	val, present := data_store.Register(url)
+
+	if present {
+		fmt.Fprintf(w, "Url - %s already present and set to %s", url, val)
 	} else {
-		data_store[key] = value
-		fmt.Fprintf(w, "Key - %s not present and now set to %s", key, value)
+		fmt.Fprintf(w, "Url - %s not present and now set to %s", url, val)
 	}
+
 }
+
 func retrivalHandler(w http.ResponseWriter, r *http.Request) {
 	key := string(r.URL.Path[1:])
-	val, ok := data_store[key]
-	if ok {
+	val, present := data_store.Find(key)
+
+	if present {
 		fmt.Fprint(w, val)
 	} else {
 		fmt.Fprintf(w, "Key %s - NOT PRESENT", key)
@@ -35,8 +36,7 @@ func retrivalHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	data_store = make(map[string]string)
-	db_store, db_error = narad.Connect()
+	data_store, db_error = narad.Connect()
 
 	if db_error != nil {
 		log.Fatal(db_error)
