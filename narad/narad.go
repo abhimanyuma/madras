@@ -45,11 +45,31 @@ func Connect() (*NaradDB, error) {
 	db, err := sql.Open("postgres", params)
 	db_struct := new(NaradDB)
 	db_struct.db_ref = db
+	db_struct.data_store = make(map[string]string)
 	return db_struct, err
 }
 
 func (n *NaradDB) Find(short_code string) (string, bool) {
-	return "http://manyu.in", true
+
+	var url string
+	val, present := n.data_store[short_code]
+
+	if present {
+		return val, true
+	}
+
+	query_string := fmt.Sprintf("SELECT url FROM redirects WHERE short_code like '%s'", short_code)
+	err := n.db_ref.QueryRow(query_string).Scan(&url)
+
+	switch {
+	case err == sql.ErrNoRows:
+		return "", false
+	case err != nil:
+		return err.Error(), false
+	default:
+		n.data_store[short_code] = url
+		return url, true
+	}
 }
 
 func (n *NaradDB) Register(url string) (string, bool) {
